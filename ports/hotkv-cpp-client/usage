@@ -1,0 +1,10 @@
+hotkv-cpp-client provides CMake targets:
+
+    find_package(hotkv-cpp CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE hotkv::hotkv-cpp)
+
+and a pkg-config file:
+
+    pkg-config --cflags --libs hotkv-cpp
+
+The SDK needs a C++20 compiler (gcc 13, clang 16, MSVC 2022).

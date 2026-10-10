@@ -1,0 +1,19 @@
+// Copyright (c) 2026 HotKV Ltd
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root.
+
+// Generated from version.hpp.in by CMake; the version below is the CMake
+// project() VERSION, the single source of truth.
+
+#pragma once
+
+#define HOTKV_CPP_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define HOTKV_CPP_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define HOTKV_CPP_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define HOTKV_CPP_VERSION_STRING "@PROJECT_VERSION@"
+
+namespace hotkv {
+
+// SDK version.
+inline constexpr const char* kVersion = HOTKV_CPP_VERSION_STRING;
+
+} // namespace hotkv

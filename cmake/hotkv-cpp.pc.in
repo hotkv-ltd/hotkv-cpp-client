@@ -1,0 +1,16 @@
+# Copyright (c) 2026 HotKV Ltd
+# Licensed under the Apache License, Version 2.0. See LICENSE in the project root.
+
+prefix=@HOTKV_CPP_PC_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: hotkv-cpp
+Description: @PROJECT_DESCRIPTION@
+URL: @PROJECT_HOMEPAGE_URL@
+Version: @PROJECT_VERSION@
+@HOTKV_CPP_PC_REQUIRES_LINE@
+Libs: -L${libdir} -lhotkv-cpp
+Libs.private: @HOTKV_CPP_PC_LIBS_PRIVATE@
+Cflags: -I${includedir}

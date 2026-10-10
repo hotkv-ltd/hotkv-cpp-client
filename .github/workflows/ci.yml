@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-unit-test:
+    name: build + tests (${{ matrix.compiler }}, ${{ matrix.linkage }}, tls ${{ matrix.tls }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { compiler: gcc-13, cxx: g++-13, linkage: static, shared: "OFF", tls: "ON" }
+          - { compiler: gcc-13, cxx: g++-13, linkage: shared, shared: "ON", tls: "OFF" }
+          - { compiler: clang-18, cxx: clang++-18, linkage: static, shared: "OFF", tls: "ON" }
+          - { compiler: clang-18, cxx: clang++-18, linkage: shared, shared: "ON", tls: "ON" }
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev ninja-build pkg-config g++-13 clang-18
+
+      - name: Configure
+        env:
+          CXX: ${{ matrix.cxx }}
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_SHARED_LIBS=${{ matrix.shared }} \
+            -DHOTKV_CPP_WITH_TLS=${{ matrix.tls }} \
+            -DHOTKV_CPP_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build
+
+      # No HOTKV_TEST_URL is set here: the integration test binary's cases
+      # skip themselves, and the unit tests (including the in-process
+      # fake-server tests for cluster redirects and number formatting) run.
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install tree is relocatable (find_package and pkg-config)
+        run: scripts/verify-install.sh "$RUNNER_TEMP/verify" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DHOTKV_CPP_WITH_TLS=${{ matrix.tls }}
+
+  sanitizers:
+    name: unit tests under ASan/UBSan and TSan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: asan-ubsan, flags: "-fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer" }
+          - { name: tsan, flags: "-fsanitize=thread -fno-omit-frame-pointer" }
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev ninja-build g++-13
+      - name: Configure and build
+        env:
+          CXX: g++-13
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_CXX_FLAGS=${{ matrix.flags }}"
+          cmake --build build
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  # Integration tests need a running HotKV server, which is a
+  # licensed binary this workflow does not have access to, so
+  # this job is documented but does not run by default.
+  #
+  # To run it yourself (locally, or in a private runner that has a HotKV
+  # server or license available):
+  #
+  #   1. Start a HotKV server, e.g.:
+  #        hotkv --port 6379 --license-path /path/to/license.json
+  #   2. Configure and build with tests enabled (see the job above).
+  #   3. Run:
+  #        export HOTKV_TEST_URL=hotkv://127.0.0.1:6379
+  #        ctest --test-dir build --output-on-failure -R hotkv_cpp_integration_tests
+  #
+  # Commands gated behind a license feature your server does not have
+  # skip automatically with GTEST_SKIP() and a reason naming the feature.
+  # See the README for the optional TLS and remote suites.
+  integration-tests:
+    name: integration tests (optional, needs a HotKV server)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    if: false
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install OpenSSL headers
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev ninja-build
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHOTKV_CPP_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build
+      - name: Run integration tests
+        env:
+          HOTKV_TEST_URL: hotkv://127.0.0.1:6379
+        run: ctest --test-dir build --output-on-failure -R hotkv_cpp_integration_tests

@@ -1,0 +1,20 @@
+# Copyright (c) 2026 HotKV Ltd
+# Licensed under the Apache License, Version 2.0. See LICENSE in the project root.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Threads)
+
+# A static libhotkv-cpp built with TLS needs OpenSSL at the consumer's
+# link line; a shared one carries that dependency itself.
+if(@HOTKV_CPP_CONFIG_NEEDS_OPENSSL@)
+    find_dependency(OpenSSL)
+endif()
+
+set(hotkv-cpp_WITH_TLS @HOTKV_CPP_WITH_TLS@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/hotkv-cpp-targets.cmake")
+
+check_required_components(hotkv-cpp)

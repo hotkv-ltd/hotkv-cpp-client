@@ -1,0 +1,28 @@
+{
+  "name": "hotkv-cpp-client",
+  "version": "1.0.0",
+  "description": "A high-performance C++ client for HotKV, a RESP2/RESP3-compatible in-memory data store with built-in AI and LLM-serving features.",
+  "homepage": "https://hotkv.com",
+  "license": "Apache-2.0",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "default-features": [
+    "tls"
+  ],
+  "features": {
+    "tls": {
+      "description": "TLS support (hotkvs:// and rediss:// URLs, mutual TLS) through OpenSSL",
+      "dependencies": [
+        "openssl"
+      ]
+    }
+  }
+}

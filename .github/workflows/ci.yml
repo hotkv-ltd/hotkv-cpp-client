@@ -19,7 +19,7 @@ jobs:
           - { compiler: clang-18, cxx: clang++-18, linkage: static, shared: "OFF", tls: "ON" }
           - { compiler: clang-18, cxx: clang++-18, linkage: shared, shared: "ON", tls: "ON" }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install toolchain
         run: |
@@ -59,7 +59,7 @@ jobs:
           - { name: asan-ubsan, flags: "-fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer" }
           - { name: tsan, flags: "-fsanitize=thread -fno-omit-frame-pointer" }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install toolchain
         run: sudo apt-get update && sudo apt-get install -y libssl-dev ninja-build g++-13
       - name: Configure and build
@@ -94,7 +94,7 @@ jobs:
     timeout-minutes: 30
     if: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install OpenSSL headers
         run: sudo apt-get update && sudo apt-get install -y libssl-dev ninja-build
       - name: Configure

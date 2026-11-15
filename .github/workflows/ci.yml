@@ -47,7 +47,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Install tree is relocatable (find_package and pkg-config)
-        run: scripts/verify-install.sh "$RUNNER_TEMP/verify" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DHOTKV_CPP_WITH_TLS=${{ matrix.tls }}
+        run: bash scripts/verify-install.sh "$RUNNER_TEMP/verify" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DHOTKV_CPP_WITH_TLS=${{ matrix.tls }}
 
   sanitizers:
     name: unit tests under ASan/UBSan and TSan
